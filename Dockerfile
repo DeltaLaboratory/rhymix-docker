@@ -1,4 +1,4 @@
-FROM php:7-fpm-stretch
+FROM php:7.4-fpm
 
 
 # install need tools layer
