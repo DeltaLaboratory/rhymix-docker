@@ -1,33 +1,12 @@
-FROM php:7.4-fpm
+FROM debian:buster
 
+COPY configure-dependencies.sh configure-php-modules.sh configure-rhymix.sh configure-php.sh configure-nginx.sh cleanup-dependencies.sh run.sh /var/tmp/
 
-# install need tools layer
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y libpng-dev apt-utils git libcurl4-openssl-dev libssl-dev libxml2-dev
+RUN /var/tmp/configure-dependencies.sh && \
+    /var/tmp/configure-php-modules.sh && \
+    /var/tmp/configure-rhymix.sh && \
+    /var/tmp/configure-php.sh && \
+    /var/tmp/configure-nginx.sh && \
+    /var/tmp/cleanup-dependencies.sh
 
-# ERROR TEST
-
-# install php extension layer
-RUN docker-php-source extract && \
-    docker-php-ext-install mysqli && \
-    docker-php-ext-install gd && \
-    docker-php-ext-install pdo_mysql && \
-    docker-php-ext-install opcache && \
-    pecl install apcu && \
-    docker-php-ext-enable apcu && \
-    docker-php-ext-install exif && \
-    docker-php-ext-install intl && \
-    docker-php-source delete
-
-# download rhymix layer
-RUN git clone https://github.com/rhymix/rhymix.git rhymix
-
-WORKDIR rhymix
-
-RUN mkdir files && \
-    chmod 777 files
-
-ENTRYPOINT ["php"]
-
-CMD ["-S", "0.0.0.0:80", "index.php"]
+CMD ["/bin/bash", "-c", "/var/tmp/run.sh"]
